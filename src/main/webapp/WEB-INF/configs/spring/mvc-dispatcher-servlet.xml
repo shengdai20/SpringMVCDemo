@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+        
+    <!-- 激活@Required @Autowired @PostConstruct @PreDestroy @Resource等注解，
+           使得在类中可以利用注解来实例化相应对象 -->
+	<context:annotation-config />
+	
+	<!-- DispatcherServlet上下文，只搜索@Controller标注的类，不搜索其他标注的类 ，比如-->
+	<context:component-scan base-package="com.imooc.mvcdemo">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	
+	<!-- 让DispatcherServlet启用基于annotation的HandlerMapping，
+	HandlerMapping无需配置，SpringMVC可以默认启动，
+	扩充了注解驱动，可以将请求参数绑定到控制器参数，
+	也就是url中的某个变量可以直接映射到controller某一个方法中的某一个输入参数 -->
+	<mvc:annotation-driven />
+	
+	<!-- 静态资源处理，css，js，imgs -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	
+	<!-- 可以将相同的数据呈现处不同的表现形式，这里我们配置defaultViews为我们的JSON格式 -->
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="order" value="1" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="xml" value="application/xml" />
+				<entry key="htm" value="text/html" />
+			</map>
+		</property>
+
+		<property name="defaultViews">
+			<list>
+				<!-- JSON View -->
+				<bean
+					class="org.springframework.web.servlet.view.json.MappingJackson2JsonView">
+				</bean>
+			</list>
+		</property>
+		<property name="ignoreAcceptHeader" value="true" />
+	</bean>
+	
+	<!-- 配置ViewResolver，告诉servlet将由哪个ViewResolver获取view，这里使用JstlView.
+	可以用多个ViewResolver，使用order属性排序 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<!-- 配置其前缀prefix，表示jsp文件在/WEB-INF/jsps/目录下，配置其后缀suffix，表示其文件类型是.jsp -->
+		<property name="prefix" value="/WEB-INF/jsps/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="209715200" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="resolveLazily" value="true" />
+	</bean>
+	
+</beans>
